@@ -1,0 +1,73 @@
+*{
+    margin: 0;
+    padding: 0;
+    border: 0;
+    text-align: center;
+    font-family: Arial;
+}
+
+.header-title{
+    background-color: rgb(43, 43, 43);
+    color: aliceblue;
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.stats-game{
+    background-color: rgb(101, 40, 215);
+    color: aliceblue;
+    border-radius: 20px;
+    font-size: 27px;
+    padding: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    width: 50%;
+    margin: auto;
+}
+
+.separacion-uno{
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.tablero{
+    width: 700px;
+    margin: auto;
+    margin-top: 2%;
+}
+
+/* estilos para la pantalla de preinicio */
+#pantalla-inicio {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+#boton-jugar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 70px;
+    border-radius: 12px;
+    background-color: rgb(160, 102, 247);
+    color: aliceblue;
+    font-size: 30px;
+    padding: 5px;
+    font-weight: bold;
+}
+#mensaje{
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: aliceblue;
+    font-size: 40px;
+    font-weight: bold;
+}
