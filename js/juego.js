@@ -1,4 +1,4 @@
-//version 1.0.0
+//version 1.1.0
 // Descripción: Juego de memoria con cartas, donde el jugador debe encontrar pares de cartas iguales.
 document.addEventListener('DOMContentLoaded', () => {
     var msj = "none";
