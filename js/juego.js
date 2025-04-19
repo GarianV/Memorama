@@ -21,7 +21,6 @@ let interval = null;
 let racha = 0;
 
 function pantalla(msj){
-    document.getElementById('puntos').innerHTML = puntos + "/600";
     console.log("pantalla")
     console.log(msj)
     let pantalla = document.getElementById("pantalla-inicio");
@@ -37,7 +36,10 @@ function pantalla(msj){
     }
 }
 function timer(unit, lim) {
+    document.getElementById('puntos').innerHTML = puntos + "/600";
     const tiempo = document.getElementById('tiempo');
+    tiempo.innerText = "00:00"; // Reinicia el temporizador
+    document.getElementById('racha').innerHTML = racha;
     let minut = 0, seg = 0;
     interval = setInterval(() => {
         seg++;

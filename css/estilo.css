@@ -9,7 +9,6 @@
 .header-title{
     background-color: rgb(43, 43, 43);
     color: aliceblue;
-    border-radius: 12px;
     padding: 10px;
     font-size: 20px;
     font-weight: bold;
@@ -21,18 +20,30 @@
     border-radius: 20px;
     font-size: 27px;
     padding: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
     font-weight: bold;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     width: 50%;
+    height: 30px;
+    min-width: 550px;
     margin: auto;
+    white-space: nowrap;
 }
 
-.separacion-uno{
-    margin-left: 20px;
-    margin-right: 20px;
+#puntos{
+    width: 97.6px;
+    text-align: right;
 }
-
+#tiempo{
+    width: 70px;
+    text-align: left;
+}
+#racha{
+    width: 31px;
+    text-align: center;
+}
 .tablero{
     width: 700px;
     margin: auto;
@@ -70,4 +81,39 @@
     color: aliceblue;
     font-size: 40px;
     font-weight: bold;
+}
+/*Adaptabilidad para dispositivos móviles*/
+@media (max-width: 768px) {
+    .header-title{
+        font-size: 15px;
+    }
+    .stats-game{
+        font-size: 2.9vw;
+        width: 80%;
+        min-width: 300px;
+    }
+    #boton-jugar {
+        width: 150px;
+        height: 50px;
+        font-size: 20px;
+    }
+    #mensaje{
+        font-size: 25px;
+    }
+    #puntos{
+        width: 65px;
+    }
+    #tiempo{
+        width: 38px;
+    }
+    #racha{
+        width: 10px;
+    }
+    .carts{
+        width: 120px;
+        height: auto;
+    }
+    .tablero{
+        width: 90%;
+    }
 }
