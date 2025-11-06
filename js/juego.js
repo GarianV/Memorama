@@ -71,7 +71,7 @@ function mecanicas() {
     console.log(IMGsDups);
 
     Cartas.forEach((c) => {
-        c.src = 'resourse/img/Chetcard-default.png';
+        c.src = 'resourse/img/Chetcard-Default.png';
     });
 
     let cart1='', cart2='', cartMem1, cartMem2;//cart solo guarda la propiedad "value", cartMem guarda todo el elemento de la jugada
@@ -130,8 +130,8 @@ function mecanicas() {
                                     console.log("diferentes")
                                     controlador = false;
                                     setTimeout(() => {
-                                        cartMem1.src = 'resourse/img/Chetcard-default.png';
-                                        cartMem2.src = 'resourse/img/Chetcard-default.png';
+                                        cartMem1.src = 'resourse/img/Chetcard-Default.png';
+                                        cartMem2.src = 'resourse/img/Chetcard-Default.png';
                                         controlador = true;
                                         reset_cartas();
                                     }, 500);
