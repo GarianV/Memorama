@@ -1,64 +1,160 @@
-*{
+* {
     margin: 0;
     padding: 0;
     border: 0;
-    text-align: center;
+    /**text-align: center;*/
+    /* Evita problemas de centrado */
     font-family: Arial;
+    box-sizing: border-box;
+    /* Buena práctica para el layout */
 }
-footer{
+
+footer {
     bottom: 0;
     left: 0;
     position: fixed;
     width: 100%;
 }
-footer > p{
+
+footer>p {
     text-align: left;
     margin-left: 1%;
     margin-bottom: 2%;
 }
-.header-title{
+
+.header-title {
     background-color: rgb(43, 43, 43);
     color: aliceblue;
     padding: 10px;
     font-size: 20px;
     font-weight: bold;
+    text-align: center;
 }
 
-.stats-game{
+.stats-game {
     background-color: rgb(101, 40, 215);
     color: aliceblue;
     border-radius: 20px;
     font-size: 27px;
-    padding: 10px;
-    padding-left: 30px;
-    padding-right: 30px;
+    padding: 10px 30px;
+    /* Simplificado */
     font-weight: bold;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+    /* Espacio uniforme */
+    align-items: center;
+    /* Centra verticalmente */
     width: 50%;
-    height: 30px;
     min-width: 550px;
-    margin: auto;
+    height: auto;
+    /* Altura automática */
+    margin: 10px auto;
+    /* Margen superior e inferior */
     white-space: nowrap;
 }
 
-#puntos{
-    width: 97.6px;
+.stats-game .stat-item {
+    display: flex;
+    /* Para alinear el texto y el valor */
+    gap: 8px;
+    /* Espacio entre "Tiempo|" y "00:00" */
+    align-items: center;
+    /* Centra verticalmente */
+
+}
+
+.stats-game a {
+    /* Estilo para el enlace 'Salir' */
+    color: aliceblue;
+    text-decoration: none;
+}
+
+.stats-game .stat-item span {
+    /* Estilo para los valores (espacio de texto normalizado) */
+    display: inline-block;
     text-align: right;
 }
-#tiempo{
-    width: 70px;
+
+#tiempo {
+    min-width: 63px;
+    /* Suficiente para "00:00" */
     text-align: left;
 }
-#racha{
-    width: 31px;
-    text-align: center;
+
+#puntos {
+    min-width: 110px;
+    /* Suficiente para "600/600" */
 }
-.tablero{
-    width: 700px;
-    margin: auto;
-    margin-top: 2%;
+
+#racha {
+    min-width: 40px;
+    /* Suficiente para un número de 2 o 3 dígitos */
 }
+
+/* * ESTILOS DEL TABLERO Y CARTAS (AQUÍ ESTÁ LA MAGIA)
+ */
+.tablero {
+    width: 90%;
+    /* Ancho flexible */
+    max-width: 550px;
+    /* Mantiene un máximo */
+    margin: 2% auto;
+    display: flex;
+    /* La clave para la escalabilidad */
+    flex-wrap: wrap;
+    /* Permite que las cartas bajen de línea */
+    justify-content: center;
+    /* Centra las cartas */
+    gap: 10px;
+    /* Espacio entre cartas */
+}
+
+/* 1. El contenedor 3D */
+.carts-container {
+    width: 130px;
+    /* Tamaño de la carta : original (140 x 175)*/
+    height: 165px;
+    position: relative;
+    perspective: 1000px;
+    /* Efecto 3D */
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+/* 2. Estilo base para ambas caras */
+.carts-face {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    /* Oculta la cara trasera del elemento */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Opcional: sombra */
+    object-fit: cover;
+    /* Asegura que la imagen cubra toda la cara */
+}
+
+/* 3. La cara frontal (la imagen del par) */
+.carts-front {
+    transform: rotateY(180deg);
+    /* Oculta por defecto */
+}
+
+/* 4. La cara trasera (la carta por defecto) */
+.carts-back {
+    /* No necesita rotación inicial */
+    background-color: #fff;
+    /* Fondo por si la img tarda en cargar */
+}
+
+/* 5. La animación de volteo */
+.carts-container.voltear {
+    transform: rotateY(180deg);
+}
+
 
 /* estilos para la pantalla de preinicio */
 #pantalla-inicio {
@@ -67,8 +163,13 @@ footer > p{
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Más oscuro */
+    z-index: 100;
+    /* Asegura que esté al frente */
+    display: block;
 }
+
 #boton-jugar {
     position: absolute;
     top: 50%;
@@ -82,48 +183,93 @@ footer > p{
     font-size: 30px;
     padding: 5px;
     font-weight: bold;
+    cursor: pointer;
+    /* Feedback al usuario */
 }
-#mensaje{
+
+#mensaje {
     position: absolute;
-    top: 20%;
+    top: 25%;
+    /* Ajustado */
     left: 50%;
     transform: translate(-50%, -50%);
     color: aliceblue;
     font-size: 40px;
     font-weight: bold;
+    width: 80%;
+    /* Evita que el texto sea muy ancho */
+    text-align: center;
 }
+
+
 /*Adaptabilidad para dispositivos móviles*/
 @media (max-width: 768px) {
-    .header-title{
+    .header-title {
         font-size: 15px;
     }
-    .stats-game{
-        font-size: 2.9vw;
-        width: 80%;
+
+    .stats-game {
+        font-size: 3.3vw;
+        /* Tamaño de fuente relativo */
+        width: 95%;
         min-width: 300px;
+        padding: 10px 15px;
     }
+
+    .stats-game .stat-item {
+        gap: 5px;
+        /* Menos espacio en móvil */
+    }
+
+    #tiempo {
+        min-width: 43px;
+        /* Suficiente para "00:00" */
+    }
+
+    #puntos {
+        min-width: 58px;
+        /* Suficiente para "600/600" */
+    }
+
+    #racha {
+        min-width: 20px;
+        /* Suficiente para un número de 2 o 3 dígitos */
+    }
+
     #boton-jugar {
         width: 150px;
         height: 50px;
         font-size: 20px;
     }
-    #mensaje{
+
+    #mensaje {
         font-size: 25px;
+        top: 30%;
     }
-    #puntos{
-        width: 65px;
+
+    /* Tamaño de las cartas en móvil */
+    .carts-container {
+        width: 130px;
+        height: 165px;
     }
-    #tiempo{
-        width: 38px;
+
+    .tablero {
+        width: 95%;
+        gap: 8px;
     }
-    #racha{
-        width: 10px;
+}
+
+@media (max-width: 480px) {
+    .stats-game {
+        font-size: 4vw;
+        /* Apila las estadísticas */
+        align-items: flex-start;
+        
+        gap: 5px;
     }
-    .carts{
-        width: 120px;
-        height: auto;
-    }
-    .tablero{
-        width: 90%;
+
+    .carts-container {
+        width: 100px;
+        height: 120px;
     }
 }

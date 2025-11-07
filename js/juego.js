@@ -1,194 +1,256 @@
-//version 1.1.0
+//version 1.1.0 (Refactorizada)
 // Descripción: Juego de memoria con cartas, donde el jugador debe encontrar pares de cartas iguales.
+
+// --- CONFIGURACIÓN DEL JUEGO ---
+const cartasIMG = {
+    Oro: 'resource/img/Chetcard-Oro.png',
+    Arbol: 'resource/img/Chetcard-Arbol.png',
+    Flor: 'resource/img/Chetcard-Flor.png',
+    Cereza: 'resource/img/Chetcard-Cereza.png',
+    Pelota: 'resource/img/Chetcard-Pelota.png',
+    Flecha: 'resource/img/Chetcard-Flecha.png'
+};
+const TIEMPO_LIMITE_MIN = 1; // Límite de tiempo en minutos
+const IMG_DEFAULT = 'resource/img/Chetcard-Default.png';
+const maxPuntos = Object.keys(cartasIMG).length * 100;
+
+// --- VARIABLES DE ESTADO DEL JUEGO ---
+let cartasDeshabilitadas = false;
+let cartaVolteada1 = null;
+let cartaVolteada2 = null;
+let puntos = 0;
+let racha = 0;
+let intervalTimer = null;
+
+// --- ELEMENTOS DEL DOM (CACHÉ) ---
+let pantallaInicioEl, mensajeEl, botonJugarEl, tableroEl, puntosEl, tiempoEl, rachaEl;
+
+// --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
-    var msj = "none";
-    document.getElementById('boton-jugar').addEventListener('click', () => {pantalla(msj)});
+    // Guardamos los elementos del DOM una sola vez
+    pantallaInicioEl = document.getElementById('pantalla-inicio');
+    mensajeEl = document.getElementById('mensaje');
+    botonJugarEl = document.getElementById('boton-jugar');
+    tableroEl = document.querySelector('.tablero');
+    puntosEl = document.getElementById('puntos');
+    tiempoEl = document.getElementById('tiempo');
+    rachaEl = document.getElementById('racha');
+
+    // Listener para el botón de jugar
+    botonJugarEl.addEventListener('click', () => {
+        mostrarPantalla(false);
+        iniciarJuego();
+    });
 });
 
-let cartasIMG = {
-    Oro: 'resourse/img/Chetcard-Oro.png',
-    Arbol: 'resourse/img/Chetcard-Arbol.png',
-    Flor: 'resourse/img/Chetcard-Flor.png',
-    Cereza: 'resourse/img/Chetcard-Cereza.png',
-    Pelota: 'resourse/img/Chetcard-Pelota.png',
-    Flecha: 'resourse/img/Chetcard-Flecha.png'
-};
-let IMGs, IMGsDups;
-let cartasDeshabilitadas = false;
-let controlador = true;
-let puntos = 0;
-let interval = null;
-let racha = 0;
-
-function pantalla(msj){
-    console.log("pantalla")
-    console.log(msj)
-    let pantalla = document.getElementById("pantalla-inicio");
-    document.getElementById("mensaje").innerText = msj;
-    if(pantalla.style.display == "none"){
-        console.log("pantalla -> block")
-        pantalla.style.display = "block";
-    }else{
-        console.log("pantalla -> none")
-        pantalla.style.display = "none";
-        resetGame();
-        timer(1000, 1); // Reinicia el temporizador con los valores iniciales
+/**
+ * Muestra u oculta la pantalla de inicio/fin.
+ * @param {boolean} mostrar - true para mostrar, false para ocultar.
+ * @param {string} [msj=''] - Mensaje para mostrar en la pantalla.
+ */
+function mostrarPantalla(mostrar, msj = '') {
+    if (msj) {
+        mensajeEl.innerText = msj;
     }
+    pantallaInicioEl.style.display = mostrar ? 'block' : 'none';
 }
-function timer(unit, lim) {
-    document.getElementById('puntos').innerHTML = puntos + "/600";
-    const tiempo = document.getElementById('tiempo');
-    tiempo.innerText = "00:00"; // Reinicia el temporizador
-    document.getElementById('racha').innerHTML = racha;
+
+/**
+ * Inicia o reinicia todo el juego.
+ */
+function iniciarJuego() {
+    // 1. Reiniciar estado
+    puntos = 0;
+    cartaVolteada1 = null;
+    cartaVolteada2 = null;
+    cartasDeshabilitadas = false;
+    
+    // 2. Detener timer anterior (si existe)
+    if (intervalTimer) {
+        clearInterval(intervalTimer);
+    }
+    
+    // 3. Actualizar UI
+    actualizarPuntos();
+    rachaEl.innerHTML = racha;
+    tiempoEl.innerText = '00:00';
+
+    // 4. Generar nuevo tablero
+    generarTablero();
+
+    // 5. Iniciar nuevo timer
+    iniciarTimer(TIEMPO_LIMITE_MIN);
+}
+
+/**
+ * Inicia el temporizador del juego.
+ * @param {number} lim - Límite de minutos.
+ */
+function iniciarTimer(lim) {
     let minut = 0, seg = 0;
-    interval = setInterval(() => {
+    
+    intervalTimer = setInterval(() => {
         seg++;
-        if (seg < 10) {
-            tiempo.innerText = "0" + minut + ":0" + seg;
-        } else if (seg >= 10 && seg < 60) {
-            tiempo.innerText = "0" + minut + ":" + seg;
-        } else {
+        if (seg >= 60) {
             seg = 0;
             minut++;
-            tiempo.innerText = "0" + minut + ":0" + seg;
         }
-        var msj = "El tiempo se ha acabado! mejor suerte la próxima vez";
-        if (minut == lim) {
-            clearInterval(interval); // Detiene el temporizador
-            puntos = 0; // Reinicia los puntos
-            racha = 0; // Reinicia la racha
-            pantalla(msj);
+
+        // Formateo de tiempo
+        tiempoEl.innerText = `${String(minut).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
+
+        // Comprobar si se acabó el tiempo
+        if (minut >= lim) {
+            clearInterval(intervalTimer);
+            racha = 0; // Reinicia la racha si pierde
+            mostrarPantalla(true, "¡El tiempo se ha acabado! Mejor suerte la próxima vez");
         }
-    }, unit);
-    mecanicas();
+    }, 1000);
 }
 
-function mecanicas() {
-    let Cartas = document.querySelectorAll(".carts");
-    IMGs = Object.keys(cartasIMG);
-    IMGsDups = IMGs.concat(IMGs);
+/**
+ * Genera dinámicamente las cartas y las añade al tablero.
+ * Esta es la clave para la escalabilidad.
+ */
+function generarTablero() {
+    // 1. Limpiar tablero anterior
+    tableroEl.innerHTML = '';
+    // Remover listener anterior si se usa (aunque con innerHTML se limpian)
+    // Para delegación de eventos, lo asignamos una sola vez fuera si no cambiamos el tableroEl
+    // Pero como lo asignaremos ahora, nos aseguramos de que solo haya uno.
+    tableroEl.onclick = manejarClicCarta; // Asigna el manejador de eventos
+
+    // 2. Preparar array de cartas
+    const IMGs = Object.keys(cartasIMG);
+    const IMGsDups = [...IMGs, ...IMGs]; // Duplicar
     mezclarArray(IMGsDups);
-    console.log(IMGsDups);
 
-    Cartas.forEach((c) => {
-        c.src = 'resourse/img/Chetcard-Default.png';
-    });
+    // 3. Crear y añadir cada carta al DOM
+    for (const nombreCarta of IMGsDups) {
+        const rutaImagen = cartasIMG[nombreCarta];
 
-    let cart1='', cart2='', cartMem1, cartMem2;//cart solo guarda la propiedad "value", cartMem guarda todo el elemento de la jugada
-    for(let i=0;i<Cartas.length;i++){
-        let carta = Cartas[i];
-        let propiedadCarta = IMGsDups[i];
-        let imagenCarta = cartasIMG[propiedadCarta];
-        switch(imagenCarta){
-            case cartasIMG.Oro:
-                carta.value = "oro";
-                break;
-            case cartasIMG.Arbol:
-                carta.value = "arbol";
-                break;
-            case cartasIMG.Cereza:
-                carta.value = "cereza";
-                break;
-            case cartasIMG.Flecha:
-                carta.value = "flecha";
-                break;
-            case cartasIMG.Flor:
-                carta.value = "flor";
-                break;
-            case cartasIMG.Pelota:
-                carta.value = "pelota";
-                break;
-        }
+        // Creamos la estructura HTML de la carta
+        const cartaContainer = document.createElement('div');
+        cartaContainer.classList.add('carts-container');
+        cartaContainer.dataset.value = nombreCarta; // Guardamos el valor para comparar
 
-        carta.addEventListener('click', ()=>{
-            if(controlador){
-                if(cartasDeshabilitadas){
-                    console.log('cartas deshabilitadas')
-                    return;
-                }else{//activación
-                    carta.src=imagenCarta;
-                    if (carta.estado !== "pareja" && carta !== cartMem1 && carta !== cartMem2) {
-                        if (!cart1 && !cartMem1) {
-                            cartMem1 = carta;
-                            cart1 = carta.value;
-                            console.log("1. carta 1: ", cart1, cartMem1);
-                        } else if (!cart2 && !cartMem2) {
-                            cartMem2 = carta;
-                            cart2 = carta.value;
-                            console.log("2. carta 2: ", cart2, cartMem2);
-                            // Verifica si hay dos cartas seleccionadas
-                            if (cart1 && cart2) {
-                                if (cart1 === cart2 && cartMem1.id !== cartMem2.id) {
-                                    // Son iguales
-                                    cartMem1.estado = "pareja";
-                                    cartMem2.estado = "pareja";
-                                    puntos += 100;
-                                    console.log("!pareja ",cartMem1.estado, cartMem2.estado," puntos: ",puntos)
-                                    reset_cartas();
-                                } else {
-                                    // Son diferentes
-                                    console.log("diferentes")
-                                    controlador = false;
-                                    setTimeout(() => {
-                                        cartMem1.src = 'resourse/img/Chetcard-Default.png';
-                                        cartMem2.src = 'resourse/img/Chetcard-Default.png';
-                                        controlador = true;
-                                        reset_cartas();
-                                    }, 500);
-                                }
-                                // Reinicia las variables después de comparar
-                                function reset_cartas(){
-                                    cart1 = '';
-                                    cart2 = '';
-                                    cartMem1 = null;
-                                    cartMem2 = null;
-                                    console.log("reinicio de variables [cart,cartMem]")
-                                }
-                                document.getElementById('puntos').innerHTML = puntos + "/600";
+        cartaContainer.innerHTML = `
+            <img src="${rutaImagen}" class="carts-face carts-front" draggable="false">
+            <img src="${IMG_DEFAULT}" class="carts-face carts-back" draggable="false">
+        `;
 
-                                // Verifica si el jugador ha ganado
-                                if(puntos==600){
-                                let msj = "Ganaste!";
-                                racha++;
-                                puntos = 0; // Reinicia los puntos
-                                document.getElementById('racha').innerHTML = racha;
-                                clearInterval(interval); // Detiene el temporizador
-                                pantalla(msj);
-                                }
-                            }
-                        }
-                        console.log('click')
-                    }
-                    
-                    //código original
-            }
-        }else{
-            console.log('controlador false')
-                return;
-        }
-    }); 
-}
+        tableroEl.appendChild(cartaContainer);
+    }
 }
 
-//Algoritmo de Fisher-Yates para mezclar el array
+/**
+ * Manejador central de clics en el tablero (Delegación de Eventos).
+ * @param {Event} event - El objeto del evento click.
+ */
+function manejarClicCarta(event) {
+    // 1. Encontrar el contenedor de la carta que fue clickeado
+    const cartaClickeada = event.target.closest('.carts-container');
+
+    // 2. Validar el clic
+    if (!cartaClickeada || // Clic fuera de una carta
+        cartasDeshabilitadas || // Clics bloqueados
+        cartaClickeada === cartaVolteada1 || // Clic en la misma carta
+        cartaClickeada.classList.contains('voltear')) // Clic en una carta ya volteada/encontrada
+    {
+        return;
+    }
+
+    // 3. Voltear la carta
+    cartaClickeada.classList.add('voltear');
+
+    // 4. Lógica de juego
+    if (!cartaVolteada1) {
+        // Es la primera carta
+        cartaVolteada1 = cartaClickeada;
+    } else {
+        // Es la segunda carta
+        cartaVolteada2 = cartaClickeada;
+        cartasDeshabilitadas = true; // Bloquear clics mientras se compara
+
+        // 5. Comparar las cartas
+        comprobarCoincidencia();
+    }
+}
+
+/**
+ * Comprueba si las dos cartas volteadas son un par.
+ */
+function comprobarCoincidencia() {
+    const esCoincidencia = cartaVolteada1.dataset.value === cartaVolteada2.dataset.value;
+
+    if (esCoincidencia) {
+        // ¡Es un par!
+        puntos += 100;
+        actualizarPuntos();
+        deshabilitarCartasCoincidentes();
+        comprobarSiGano();
+    } else {
+        // No es un par
+        voltearCartasIncorrectas();
+    }
+}
+
+/**
+ * Deja las cartas volteadas y las resetea para la siguiente jugada.
+ */
+function deshabilitarCartasCoincidentes() {
+    // Las cartas ya tienen la clase 'voltear', solo reseteamos las variables
+    resetearTurno();
+}
+
+/**
+ * Oculta las cartas después de un breve momento.
+ */
+function voltearCartasIncorrectas() {
+    setTimeout(() => {
+        cartaVolteada1.classList.remove('voltear');
+        cartaVolteada2.classList.remove('voltear');
+        resetearTurno();
+    }, 800); // Dar tiempo a ver la segunda carta
+}
+
+/**
+ * Resetea las variables de turno y re-habilita los clics.
+ */
+function resetearTurno() {
+    [cartaVolteada1, cartaVolteada2] = [null, null];
+    cartasDeshabilitadas = false;
+}
+
+/**
+ * Comprueba si el jugador ha ganado la partida.
+ */
+function comprobarSiGano() {
+    if (puntos === maxPuntos) {
+        racha++;
+        rachaEl.innerHTML = racha;
+        clearInterval(intervalTimer); // Detiene el temporizador
+        // Espera 1 segundo para mostrar la última carta antes de la pantalla de victoria
+        setTimeout(() => {
+            mostrarPantalla(true, "¡Felicidades, has ganado!");
+        }, 1000);
+    }
+}
+
+/**
+ * Actualiza el contador de puntos en la UI.
+ */
+function actualizarPuntos() {
+    puntosEl.innerHTML = `${puntos}/${maxPuntos}`;
+}
+
+/**
+ * Algoritmo de Fisher-Yates para mezclar el array (in-place).
+ * @param {Array} array - El array a mezclar.
+ */
 function mezclarArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
 }
-// Limpia los event listeners de las cartas
-function limpiarEventListeners() {
-    const cartas = document.querySelectorAll('.carts');
-    cartas.forEach(carta => {
-        const cartaLimpia = carta.cloneNode(true); // Clona el nodo, lo que elimina los listeners
-        carta.parentNode.replaceChild(cartaLimpia, carta); // Reemplaza la carta por la versión "limpia"
-    });
-}
-function resetGame() {
-    cartasDeshabilitadas = false; // Habilita las cartas nuevamente
-    controlador = true; // Reinicia el controlador
-    IMGs = [];
-    IMGsDups = [];
-    limpiarEventListeners(); // Limpia los event listeners de las cartas
-}     
